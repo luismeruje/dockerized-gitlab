@@ -1,5 +1,5 @@
 # dockerized-gitlab
-Docker images for gitlab high availability deployment/ one-machine deployment
+Gitlab system deployment with docker and ansible. We provide both high availability and single machine deployments.
 
 UNDER DEVELOPMENT - PLEASE WAIT FOR FURTHER COMMITS
 
