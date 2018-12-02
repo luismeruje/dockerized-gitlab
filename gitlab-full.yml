@@ -1,0 +1,92 @@
+- name: test-instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    service_account_email: 567105855498-compute@developer.gserviceaccount.com
+    gcp_cred_file: /home/treishy/dev/a4/SDB/credentials.json
+    gcp_project: true-entropy-221110
+    gcp_cred_kind: serviceaccount
+    machine_type: n1-standard-1
+    image: debian-7
+    zone: us-west1-c
+
+  tasks:
+
+    - name: create a disk
+      gcp_compute_disk:
+          name: "disk-instance"
+          size_gb: 30
+          source_image: projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts
+          zone: "{{ zone }}"
+          project: "{{ gcp_project }}"
+          auth_kind: "{{ gcp_cred_kind }}"
+          service_account_file: "{{ gcp_cred_file }}"
+          state: present
+      register: disk
+
+    - name: create a network
+      gcp_compute_network:
+          name: "network-instance"
+          project: "{{ gcp_project }}"
+          auth_kind: "{{ gcp_cred_kind }}"
+          service_account_file: "{{ gcp_cred_file }}"
+          state: present
+      register: network
+
+
+
+    - name: create a firewall
+      gcp_compute_firewall:
+        name: "gitlabfull-firewall"
+        allowed:
+          - ip_protocol: tcp
+            ports:
+              - 22
+              - 80
+          - ip_protocol: icmp
+        network: "global/networks/{{ network.name }}"
+        project: "{{ gcp_project }}"
+        auth_kind: "{{ gcp_cred_kind }}"
+        service_account_file: "{{ gcp_cred_file }}"
+        state: present
+
+
+    - name: create an instance
+      gcp_compute_instance:
+          name: "instancedocker"
+          machine_type: "{{ machine_type }}"
+          disks:
+          - auto_delete: true
+            boot: true
+            source: "{{ disk }}"
+          metadata:
+            startup-script: |
+              #!/bin/sh
+              sudo apt-get install language-pack-pt language-pack-en
+              sudo dpkg-reconfigure locales
+              sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fssl https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo apt-key fingerprint 0EEFCD88
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+              sudo apt-get -y update
+              sudo apt-get -y install docker-ce
+              sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-'uname -s '-' uname -m ' -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+              cd /home/treishy
+              sudo docker pull luismeruje/dockerized-gitlab:full-prod
+              sudo docker run -p 80:80 -dt luismeruje/dockerized-gitlab:full-prod
+
+
+            cost-center: '12345'
+          network_interfaces:
+          - network: "{{ network }}"
+            access_configs:
+            - name: External NAT
+              type: ONE_TO_ONE_NAT
+          zone: "{{ zone }}"
+          project: "{{ gcp_project }}"
+          auth_kind: "{{ gcp_cred_kind }}"
+          service_account_file: "{{ gcp_cred_file }}"
+          state: present
