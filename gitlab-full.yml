@@ -5,7 +5,7 @@
 
   vars:
     service_account_email: 567105855498-compute@developer.gserviceaccount.com
-    gcp_cred_file: /home/treishy/dev/a4/SDB/credentials.json
+    gcp_cred_file: /insert/credentials/path/here
     gcp_project: true-entropy-221110
     gcp_cred_kind: serviceaccount
     machine_type: n1-standard-1
