@@ -1,0 +1,30 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    gcp_region: us-east1
+    gcp_zone: us-east1-b
+    gcp_project: true-entropy-221110 
+    gcp_cred_kind: serviceaccount
+    gcp_cred_file: ../credentials.json
+    gcp_machine_type: f1-micro
+    source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
+  roles:
+    #create network
+    - role: gcp_network
+    
+    #create machines
+    - role: gcp_instance
+      vars:
+        #is_external: false
+        disks:
+          - disk-01
+        addresses:
+          - addr-01
+        instances:
+          - { index: 1, tag: test }
+        disk_size: 10
+        disk_type: pd-standard
+
+#private ip: ansible_default_ipv4.address
+#external ip: networkInterfaces[0].accessConfigs[0].natIP || inventory_hostname

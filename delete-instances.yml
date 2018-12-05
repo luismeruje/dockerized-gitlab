@@ -1,0 +1,13 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Delete instances
+      gcp_compute_instance:
+        name: "{{ hostvars[item].name }}"
+        zone: us-east1-b
+        project: true-entropy-221110 
+        auth_kind: "serviceaccount"
+        service_account_file: ../credentials.json
+        state: absent
+      loop: "{{ groups['all'] }}"

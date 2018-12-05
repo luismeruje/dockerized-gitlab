@@ -1,0 +1,73 @@
+- name: create a disk
+  gcp_compute_disk:
+    name: "{{ item }}"
+    size_gb: "{{ disk_size }}"
+    type: "{{ disk_type }}" # pd-standard || pd-ssd
+    source_image: "{{ source_image }}"
+    zone: "{{ gcp_zone }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+  register: disk
+  loop: "{{ disks }}"
+
+- name: create an address
+  gcp_compute_address:
+    name: "{{ item }}"
+    region: "{{ gcp_region }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: absent
+  register: address
+  loop: "{{ addresses }}"
+
+- name: create an instance
+  gcp_compute_instance:
+    name: "gitlab-instance-{{ '%02d' | format(item.index) }}"
+    machine_type: "{{ gcp_machine_type }}"
+    disks:
+      - auto_delete: true
+        boot: true
+        source: "{{ disk.results[item.index - 1] }}"
+    metadata:
+      startup-script: |
+        #!/bin/bash
+        apt-get update -y
+        apt-get upgrade -y
+    tags:
+      items: "{{ item.tag }}"
+    network_interfaces:
+      - network: "{{ network }}"
+        access_configs:
+        - name: External NAT
+          nat_ip: "{{ address.results[item.index - 1] }}"
+          type: ONE_TO_ONE_NAT
+        #  when: "{{ is_external }}"
+    zone: "{{ gcp_zone }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+  register: instance
+  loop: "{{ instances }}"
+
+
+#- name: Add hosts to in memory inventory
+#  add_host:
+#    name: "{{ item.networkInterfaces[0].networkIP }}"
+#    groups: "{{ item.tags['items'] | join(',') }}"
+#  loop: "{{ instance.results }}"
+
+- name: Add hosts to in memory inventory
+  add_host:
+    name: "{{ item.networkInterfaces[0].accessConfigs[0].natIP }}"
+    groups: "{{ item.tags['items'] | join(',') }}"
+  loop: "{{ instance.results }}"
+
+- name: Wait for instances to respond
+  wait_for:
+    host: "{{ item }}"
+    port: 22
+  loop: "{{ groups['all'] }}"

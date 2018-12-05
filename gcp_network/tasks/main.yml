@@ -1,0 +1,39 @@
+- name: create a network
+  gcp_compute_network:
+    name: "gitlab-network"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+  register: network
+
+- name: internal/external firewall rules
+  gcp_compute_firewall:
+    name: "internal-external-rules"
+    allowed:
+      - ip_protocol: tcp
+        ports:
+          - 22
+          - 80
+      - ip_protocol: icmp
+    network: "global/networks/{{ network.name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present
+
+- name: internal firewall rules
+  gcp_compute_firewall:
+    name: "internal-rules"
+    allowed:
+      - ip_protocol: tcp
+        ports:
+          - 5432
+          - 5000
+    source_ranges:
+      - 10.128.0.0/9
+    network: "global/networks/{{ network.name }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    state: present

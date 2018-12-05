@@ -1,0 +1,16 @@
+plugin: gcp_compute
+projects:
+  - true-entropy-221110
+zones:
+  - us-east1-b
+filters:
+  # - machineType = n1-standard-1
+  - name = gitlab-instance-*
+
+keyed_groups:
+  - prefix: ''
+    separator: ''
+    key: tags['items']
+
+auth_kind: serviceaccount
+service_account_file: ../credentials.json

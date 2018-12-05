@@ -1,0 +1,1 @@
+ansible-playbook -i inventory.gcp.yml delete-instances.yml
