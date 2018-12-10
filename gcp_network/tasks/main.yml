@@ -31,7 +31,7 @@
           - 5432
           - 5000
     source_ranges:
-      - 10.128.0.0/9
+      - 10.0.0.0/8
     network: "global/networks/{{ network.name }}"
     project: "{{ gcp_project }}"
     auth_kind: "{{ gcp_cred_kind }}"

@@ -44,7 +44,6 @@
         - name: External NAT
           nat_ip: "{{ address.results[item.index - 1] }}"
           type: ONE_TO_ONE_NAT
-        #  when: "{{ is_external }}"
     zone: "{{ gcp_zone }}"
     project: "{{ gcp_project }}"
     auth_kind: "{{ gcp_cred_kind }}"
@@ -52,13 +51,6 @@
     state: present
   register: instance
   loop: "{{ instances }}"
-
-
-#- name: Add hosts to in memory inventory
-#  add_host:
-#    name: "{{ item.networkInterfaces[0].networkIP }}"
-#    groups: "{{ item.tags['items'] | join(',') }}"
-#  loop: "{{ instance.results }}"
 
 - name: Add hosts to in memory inventory
   add_host:

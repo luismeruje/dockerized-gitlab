@@ -13,18 +13,39 @@
     #create network
     - role: gcp_network
     
-    #create machines
+    #create database machines
     - role: gcp_instance
       vars:
-        #is_external: false
         disks:
           - disk-01
+          - disk-02
         addresses:
           - addr-01
+          - addr-02
         instances:
-          - { index: 1, tag: test }
+          - { index: 1, tag: db-primary }
+          - { index: 2, tag: db-standby }
         disk_size: 10
-        disk_type: pd-standard
+        disk_type: pd-ssd
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Wait for updates to finish
+      shell: while pgrep apt; do sleep 1; done; 
+
+- hosts: db-*
+  become: yes
+  roles:
+    - { 
+      role: db-install,
+      pg_version: '9.5',
+      bucardo_version: '5.5.0',
+      listen: '*', 
+      pg_password: '',
+      floating_ip: '10.255.255.1'
+      }
+
 
 #private ip: ansible_default_ipv4.address
 #external ip: networkInterfaces[0].accessConfigs[0].natIP || inventory_hostname

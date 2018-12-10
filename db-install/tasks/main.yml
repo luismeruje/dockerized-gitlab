@@ -1,0 +1,97 @@
+- name: Install PostgreSQL
+  apt:
+    name: ['postgresql-{{ pg_version }}', python-psycopg2, postgresql-contrib]
+    state: latest
+
+- name: Install Keepalived
+  apt:
+    name: ['keepalived']
+    state: latest
+
+- name: Install Bucardo
+  block:
+    - get_url:
+        url: http://mirrors.kernel.org/ubuntu/pool/universe/b/bucardo/bucardo_5.5.0-1_all.deb
+        dest: /home/bucardo.deb
+    - apt:
+        name: ['postgresql-plperl']
+        state: latest
+    - apt:
+        deb: /home/bucardo.deb
+    - shell: |
+        sudo apt -y -f install
+
+- name: Setup Keepalived
+  block:
+    - ufw:
+        rule: allow
+        direction: in
+        from_ip: "{{ ansible_default_ipv4.address }}"
+        to_ip: "224.0.0.18"
+    - sysctl:
+        name: net.ipv4.ip_nonlocal_bind
+        value: 1
+        sysctl_set: yes
+        reload: yes
+    - template:
+        src: keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+    - service:
+        name: keepalived
+        state: restarted
+
+
+- name: Setup PostgreSQL
+  become_user: postgres
+  block:
+    #gitlab database
+    - postgresql_db:
+        name: gitlabhq_production
+    #gitlab user
+    - postgresql_user:
+        db: gitlabhq_production
+        name: gitlab
+        password: "{{ pg_password }}"
+    #bucardo user
+    - postgresql_user:
+        name: bucardo
+        password: password
+        role_attr_flags: SUPERUSER
+    #bucardo database
+    - postgresql_db:
+        name: bucardo
+        owner: bucardo
+    #postgresql conf
+    - replace:
+        path: /etc/postgresql/{{ pg_version }}/main/postgresql.conf
+        regexp: '^(#)?listen_addresses.*'
+        replace: listen_addresses = '{{ listen }}'
+    #postgresql hba
+    - copy:
+        src: pg_hba.conf
+        dest: /etc/postgresql/{{ pg_version }}/main/pg_hba.conf
+
+- name: Restart Postgresql
+  service:
+    name: postgresql
+    state: restarted
+
+- name: Bucardo install
+  become: yes
+  shell: |
+    mkdir /var/run/bucardo
+    bucardo install --batch
+  ignore_errors: yes
+
+- name: Start Bucardo at boot
+  block:
+    #copy script
+    - copy:
+        src: start_bucardo.sh
+        dest: /home/start_bucardo.sh
+    #chmod
+    - file:
+        path: /home/start_bucardo.sh
+        mode: a+x
+    #add cron job
+    - shell: (crontab -l 2>/dev/null; echo "@reboot /home/start_bucardo.sh") | crontab -
