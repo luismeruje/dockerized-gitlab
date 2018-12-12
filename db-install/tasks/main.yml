@@ -9,6 +9,7 @@
     state: latest
 
 - name: Install Bucardo
+  become: yes
   block:
     - get_url:
         url: http://mirrors.kernel.org/ubuntu/pool/universe/b/bucardo/bucardo_5.5.0-1_all.deb
@@ -19,7 +20,7 @@
     - apt:
         deb: /home/bucardo.deb
     - shell: |
-        sudo apt -y -f install
+        apt -y -f install
 
 - name: Setup Keepalived
   block:
@@ -44,14 +45,23 @@
 - name: Setup PostgreSQL
   become_user: postgres
   block:
-    #gitlab database
-    - postgresql_db:
-        name: gitlabhq_production
     #gitlab user
     - postgresql_user:
-        db: gitlabhq_production
         name: gitlab
         password: "{{ pg_password }}"
+    #gitab database
+    - postgresql_db:
+        name: gitlabhq_production
+        owner: gitlab
+    #copy dump
+    - copy:
+        src: gitlab_db.sql
+        dest: /tmp/gitlab_db.sql
+    #restore gitlab database
+    - postgresql_db:
+        name: gitlabhq_production
+        target: /tmp/gitlab_db.sql
+        state: restore
     #bucardo user
     - postgresql_user:
         name: bucardo
@@ -79,9 +89,29 @@
 - name: Bucardo install
   become: yes
   shell: |
-    mkdir /var/run/bucardo
+    mkdir -p /var/run/bucardo
     bucardo install --batch
   ignore_errors: yes
+
+- name: Configure Bucardo
+  become: yes
+  shell: |
+    bucardo add db db1 dbname=gitlabhq_production host={{ hostvars[groups["db-primary"][0]].ansible_default_ipv4.address }} user=bucardo pass=password
+    bucardo add db db2 dbname=gitlabhq_production host={{ hostvars[groups["db-standby"][0]].ansible_default_ipv4.address }} user=bucardo pass=password
+    bucardo add table % db=db1
+    bucardo add table % db=db2
+    bucardo add all tables --herd=db1_db2 db=db1
+    bucardo add all tables --herd=db2_db1 db=db2
+    bucardo add sync sync_db1ToDb2 relgroup=db1_db2 db=db1,db2
+    bucardo add sync sync_db2ToDb1 relgroup=db2_db1 db=db2,db1
+  tags: db-primary
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+
+- name: Start Bucardo
+  become: yes
+  shell: |
+    bucardo start
 
 - name: Start Bucardo at boot
   block:
