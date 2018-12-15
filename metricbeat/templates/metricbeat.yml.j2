@@ -1,0 +1,59 @@
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+
+metricbeat.modules:
+{% if type == 'db' %}
+- module: postgresql
+  enabled: true
+  metricsets:
+    - database
+    - bgwriter
+    - activity
+  period: 10s
+  hosts: ["postgres://localhost:5432"]
+  username: gitlab
+  password: password
+{% endif %}
+
+{% if type == 'redis' %}
+- module: redis
+  metricsets: ["info", "keyspace"]
+  enabled: true
+  period: 10s
+  hosts: ["127.0.0.1:6379"]
+  #password: password
+{% endif %}
+
+{% if type == 'app' %}
+- module: docker
+  metricsets:
+    - "container"
+    - "cpu"
+    - "diskio"
+    - "healthcheck"
+    - "info"
+    - "image"
+    - "memory"
+    - "network"
+  hosts: ["unix:///var/run/docker.sock"]
+  period: 10s
+  enabled: true
+{% endif %}
+
+setup.kibana:
+    host: "{{ hostvars[groups["monitor"][0]].ansible_default_ipv4.address }}"
+
+#output.logstash:
+#    hosts: ["{{ hostvars[groups["monitor"][0]].ansible_default_ipv4.address }}"]
+
+output.elasticsearch:
+    hosts: ["{{ hostvars[groups["monitor"][0]].ansible_default_ipv4.address }}"]
+
+processors:  
+    - add_host_metadata: ~
+    - add_cloud_metadata: ~

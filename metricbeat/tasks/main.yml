@@ -1,0 +1,44 @@
+- name: Add Elastic repo
+  block:
+    - apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+    - lineinfile:
+        path: /etc/apt/sources.list.d/elastic-6.x.list
+        line: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
+        create: yes
+
+- name: Install Metricbeat
+  apt:
+    name: ['metricbeat']
+    update_cache: yes
+    state: latest
+
+- name: Enable Metricbeat at startup
+  become: yes
+  shell: "update-rc.d metricbeat defaults 95 10"
+
+- name: Configure Metricbeat
+  template:
+    src: metricbeat.yml.j2
+    dest: /etc/metricbeat/metricbeat.yml
+
+- name: Metricbeat modules
+  become: yes
+  block:
+    - shell: "metricbeat modules enable postgresql"
+      when: type == 'db'
+    - shell: "metricbeat modules enable redis"
+      when: type == 'redis'
+    - shell: "metricbeat modules enable docker"
+      when: type == 'app'
+
+- name: Metricbeat setup
+  become: yes
+  shell: metricbeat setup
+  run_once: true
+
+- name: Start Metricbeat
+  service:
+    name: metricbeat
+    state: started

@@ -15,6 +15,7 @@
         ports:
           - 22
           - 80
+          - 5601
       - ip_protocol: icmp
     network: "global/networks/{{ network.name }}"
     project: "{{ gcp_project }}"
@@ -30,6 +31,9 @@
         ports:
           - 5432
           - 5000
+          - 5601
+          - 9200
+          - 5044
     source_ranges:
       - 10.0.0.0/8
     network: "global/networks/{{ network.name }}"

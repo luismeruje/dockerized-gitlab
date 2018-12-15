@@ -5,7 +5,7 @@ zones:
   - us-east1-b
 filters:
   # - machineType = n1-standard-1
-  - name = gitlab-instance-*
+  - name = gitlab-*
 
 keyed_groups:
   - prefix: ''

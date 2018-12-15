@@ -7,32 +7,42 @@
     gcp_project: true-entropy-221110 
     gcp_cred_kind: serviceaccount
     gcp_cred_file: ../credentials.json
-    gcp_machine_type: f1-micro
     source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
   roles:
     #create network
-    - role: gcp_network
+    - role: gcp-network
+
+    #create monitor
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: n1-standard-1
+        instances:
+          - { index: 1, tag: monitor }
+        disk_size: 10
+        disk_type: pd-standard
+        type: monitor
     
     #create database machines
-    - role: gcp_instance
+    - role: gcp-instance
       vars:
-        disks:
-          - disk-01
-          - disk-02
-        addresses:
-          - addr-01
-          - addr-02
+        gcp_machine_type: f1-micro
         instances:
           - { index: 1, tag: db-primary }
           - { index: 2, tag: db-standby }
         disk_size: 10
         disk_type: pd-ssd
+        type: db
 
 - hosts: all
   become: yes
   tasks:
     - name: Wait for updates to finish
-      shell: while pgrep apt; do sleep 1; done; 
+      shell: while pgrep apt; do sleep 1; done;
+
+- hosts: monitor
+  become: yes
+  roles: 
+    - { role: monitor }
 
 - hosts: db-*
   become: yes
@@ -42,10 +52,7 @@
       pg_version: '9.5',
       bucardo_version: '5.5.0',
       listen: '*', 
-      pg_password: '',
+      pg_password: 'password',
       floating_ip: '10.255.255.1'
       }
-
-
-#private ip: ansible_default_ipv4.address
-#external ip: networkInterfaces[0].accessConfigs[0].natIP || inventory_hostname
+    - { role: metricbeat, type: db }

@@ -1,6 +1,6 @@
 - name: create a disk
   gcp_compute_disk:
-    name: "{{ item }}"
+    name: "disk-{{ type }}-{{ '%02d' | format(item.index) }}"
     size_gb: "{{ disk_size }}"
     type: "{{ disk_type }}" # pd-standard || pd-ssd
     source_image: "{{ source_image }}"
@@ -10,22 +10,22 @@
     service_account_file: "{{ gcp_cred_file }}"
     state: present
   register: disk
-  loop: "{{ disks }}"
+  loop: "{{ instances }}"
 
 - name: create an address
   gcp_compute_address:
-    name: "{{ item }}"
+    name: "addr-{{ type }}-{{ '%02d' | format(item.index) }}"
     region: "{{ gcp_region }}"
     project: "{{ gcp_project }}"
     auth_kind: "{{ gcp_cred_kind }}"
     service_account_file: "{{ gcp_cred_file }}"
     state: absent
   register: address
-  loop: "{{ addresses }}"
+  loop: "{{ instances }}"
 
 - name: create an instance
   gcp_compute_instance:
-    name: "gitlab-instance-{{ '%02d' | format(item.index) }}"
+    name: "gitlab-{{ type }}-{{ '%02d' | format(item.index) }}"
     machine_type: "{{ gcp_machine_type }}"
     disks:
       - auto_delete: true
