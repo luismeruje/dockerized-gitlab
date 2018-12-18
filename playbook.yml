@@ -4,7 +4,7 @@
   vars:
     gcp_region: us-east1
     gcp_zone: us-east1-b
-    gcp_project: true-entropy-221110 
+    gcp_project: true-entropy-221110
     gcp_cred_kind: serviceaccount
     gcp_cred_file: ../credentials.json
     source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
@@ -21,7 +21,7 @@
         disk_size: 10
         disk_type: pd-standard
         type: monitor
-    
+
     #create database machines
     - role: gcp-instance
       vars:
@@ -33,6 +33,18 @@
         disk_type: pd-ssd
         type: db
 
+    #create redis machines
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: f1-micro
+        instances:
+          - { index: 1, tag: redis-master }
+          - { index: 2, tag: redis-slave1 }
+          - { index: 3, tag: redis-slave2 }
+        disk_size: 10
+        disk_type: pd-ssd
+        type: redis-master
+
 - hosts: all
   become: yes
   tasks:
@@ -41,17 +53,27 @@
 
 - hosts: monitor
   become: yes
-  roles: 
+  roles:
     - { role: monitor }
+
+- hosts: redis-master
+  become: yes
+  roles:
+    - { role: redis-master }
+
+- hosts: redis-slave*
+  become: yes
+  roles:
+    - { role: redis-slave }
 
 - hosts: db-*
   become: yes
   roles:
-    - { 
+    - {
       role: db-install,
       pg_version: '9.5',
       bucardo_version: '5.5.0',
-      listen: '*', 
+      listen: '*',
       pg_password: 'password',
       floating_ip: '10.255.255.1'
       }
