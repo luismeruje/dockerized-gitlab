@@ -4,7 +4,7 @@
   vars:
     gcp_region: us-east1
     gcp_zone: us-east1-b
-    gcp_project: true-entropy-221110
+    gcp_project: true-entropy-221110 
     gcp_cred_kind: serviceaccount
     gcp_cred_file: ../credentials.json
     source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
@@ -21,7 +21,7 @@
         disk_size: 10
         disk_type: pd-standard
         type: monitor
-
+    
     #create database machines
     - role: gcp-instance
       vars:
@@ -53,8 +53,22 @@
 
 - hosts: monitor
   become: yes
-  roles:
+  roles: 
     - { role: monitor }
+
+- hosts: db-*
+  become: yes
+  roles:
+    - { 
+      role: db-install,
+      pg_version: '9.5',
+      bucardo_version: '5.5.0',
+      listen: '*', 
+      pg_password: 'password',
+      floating_ip: '10.10.10.10',
+      zone: us-east1-b
+      }
+    - { role: metricbeat, type: db }
 
 - hosts: redis-master
   become: yes
@@ -65,16 +79,3 @@
   become: yes
   roles:
     - { role: redis-slave }
-
-- hosts: db-*
-  become: yes
-  roles:
-    - {
-      role: db-install,
-      pg_version: '9.5',
-      bucardo_version: '5.5.0',
-      listen: '*',
-      pg_password: 'password',
-      floating_ip: '10.255.255.1'
-      }
-    - { role: metricbeat, type: db }

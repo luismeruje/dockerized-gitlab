@@ -1,0 +1,6 @@
+#!/bin/bash
+gcloud compute routes delete floating-db --quiet
+gcloud compute routes create floating-db \
+    --destination-range  {{ floating_ip }}/32 --network gitlab-network \
+    --priority 500 --next-hop-instance-zone {{ zone }} \
+    --next-hop-instance {{ ansible_hostname }} --quiet
