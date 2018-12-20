@@ -1,0 +1,22 @@
+#Maybe not needed
+- name: Install Docker
+  apt:
+    name: [docker.io]
+    state: latest
+
+- name: Install pip
+  apt:
+    name: [python-pip]
+    state: latest
+
+- name: Upgrade pip
+  shell: |
+    pip install --upgrade pip
+
+- name: Install docker pip module
+  shell: |
+    pip install docker
+
+- name: Pull docker image
+  docker_image:
+    name: luismeruje/dockerized-gitlab:gitaly
