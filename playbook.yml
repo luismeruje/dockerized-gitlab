@@ -33,6 +33,18 @@
         disk_type: pd-ssd
         type: db
 
+    #create redis machines
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: f1-micro
+        instances:
+          - { index: 1, tag: redis-master }
+          - { index: 2, tag: redis-slave1 }
+          - { index: 3, tag: redis-slave2 }
+        disk_size: 10
+        disk_type: pd-ssd
+        type: redis-master
+
 - hosts: all
   become: yes
   tasks:
@@ -53,6 +65,17 @@
       bucardo_version: '5.5.0',
       listen: '*', 
       pg_password: 'password',
-      floating_ip: '10.255.255.1'
+      floating_ip: '10.10.10.10',
+      zone: us-east1-b
       }
     - { role: metricbeat, type: db }
+
+- hosts: redis-master
+  become: yes
+  roles:
+    - { role: redis-master }
+
+- hosts: redis-slave*
+  become: yes
+  roles:
+    - { role: redis-slave }

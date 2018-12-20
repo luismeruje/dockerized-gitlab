@@ -1,0 +1,8 @@
+auto lo
+iface lo inet loopback
+
+source /etc/network/interfaces.d/*.cfg
+
+iface ens4 inet static
+    address {{ floating_ip }}
+    netmask 255.255.255.255
