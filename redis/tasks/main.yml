@@ -3,26 +3,33 @@
     name: [redis-server]
     state: latest
 
-#- name: Install Keepalived
-#  apt:
-#    name: ['keepalived']
-#    state: latest
-
 - name: Configuring Redis Server and Restart
   block:
+    #redis conf
     - template:
-        src: masterredis.conf.j2
+        src: redis.conf.j2
         dest: /etc/redis/redis.conf
+    #create user git
+    - user:
+        name: git
+        comment: 'Gitlab'
+        groups: redis
+        append: yes
+    #create directory redis
+    - file:
+        path: /var/run/redis
+        state: directory
+        owner: redis
+        group: redis
+        mode: 0755
     - shell: |
-        sudo adduser --disabled-login --gecos 'GitLab' git
-        sudo mkdir /var/run/redis
-        sudo chown redis:redis /var/run/redis
-        sudo chmod 755 /var/run/redis
         if [ -d /etc/tmpfiles.d ]; then
           echo 'd  /var/run/redis  0755  redis  redis  10d  -' | sudo tee -a /etc/tmpfiles.d/redis.conf
         fi
-        sudo usermod -aG redis git
-        sudo service redis-server restart
+    #restart service
+    - service:
+        name: redis-server
+        state: restarted
 
 - name: Configuring Redis Sentinel
   block:
@@ -30,9 +37,7 @@
         src: redissentinel.conf.j2
         dest: /etc/redis/sentinel.conf
 
-
 - name: Running Redis Sentinel
-  block:
-    - shell: |
-        sudo chmod +rw /etc/redis/sentinel.conf
-        sudo redis-server /etc/redis/sentinel.conf --sentinel &
+  shell: |
+    sudo chmod +rw /etc/redis/sentinel.conf
+    sudo redis-server /etc/redis/sentinel.conf --sentinel &
