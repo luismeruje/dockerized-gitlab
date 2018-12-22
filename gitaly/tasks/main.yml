@@ -20,3 +20,12 @@
 - name: Pull docker image
   docker_image:
     name: luismeruje/dockerized-gitlab:gitaly
+
+- name: Run image
+  docker_container:
+    name: gitaly
+    tty: yes
+    detach: yes
+    image: luismeruje/dockerized-gitlab:gitaly
+    ports:
+      - "8075:8075"

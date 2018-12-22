@@ -1,0 +1,43 @@
+#Maybe not needed
+- name: Install Docker
+  apt:
+    name: [docker.io]
+    state: latest
+
+- name: Install pip
+  apt:
+    name: [python-pip]
+    state: latest
+
+- name: Upgrade pip
+  shell: |
+    pip install --upgrade pip
+
+- name: Install docker pip module
+  shell: |
+    pip install docker
+
+- name: Pull docker image
+  docker_image:
+    name: luismeruje/dockerized-gitlab:noGitaly
+
+- name: Create container
+  docker_container:
+    name: app
+    tty: yes
+    detach: yes
+    state: present
+    image: luismeruje/dockerized-gitlab:noGitaly
+    ports:
+      - "80:80"
+
+- name: Copy config file to container(cheating)
+  shell: |
+    docker cp /root/gitlab.yml app:/home/git/gitlab/config/gitlab.yml
+
+- name: Start container
+  docker_container:
+    name: app
+    tty: yes
+    detach: yes
+    state: started
