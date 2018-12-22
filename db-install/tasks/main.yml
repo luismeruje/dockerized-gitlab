@@ -90,9 +90,11 @@
 
 - name: Bucardo install
   become: yes
-  shell: |
-    mkdir -p /var/run/bucardo
-    bucardo install --batch
+  block:
+    - file: 
+        path: /var/run/bucardo
+        state: directory
+    - shell: "bucardo install --batch"
   ignore_errors: yes
 
 - name: Configure Bucardo
