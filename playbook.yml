@@ -65,6 +65,7 @@
         type: gitlab-app
 
 - hosts: localhost
+  gather_facts: no
   tasks:
     - name: Wait for instances to respond
       wait_for:
