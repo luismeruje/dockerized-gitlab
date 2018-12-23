@@ -5,4 +5,4 @@ sentinel monitor gitlab-redis {{hostvars [groups ["redis-master"] [0]].ansible_d
 #masterauth "gitlab"
 sentinel down-after-milliseconds gitlab-redis 10000
 sentinel failover-timeout gitlab-redis 30000
-sentinel auth-pass gitlab-redis gitlab
+#sentinel auth-pass gitlab-redis gitlab
