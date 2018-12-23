@@ -1,4 +1,4 @@
-daemonize yes
+ daemonize yes
 pidfile /var/run/redis/redis-server.pid
 port 6379
 tcp-backlog 511
@@ -19,14 +19,14 @@ dir /var/lib/redis
 {% if type == "slave" %}
 slaveof {{hostvars [groups ["redis-master"] [0]].ansible_default_ipv4.address}} 6379
 {% endif %}
-masterauth gitlab
+#masterauth gitlab
 slave-serve-stale-data yes
 slave-read-only yes
 repl-diskless-sync no
 repl-diskless-sync-delay 5
 repl-disable-tcp-nodelay no
 slave-priority 100
-requirepass gitlab
+#requirepass gitlab
 appendonly no
 appendfilename "appendonly.aof"
 appendfsync everysec

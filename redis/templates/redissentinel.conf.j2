@@ -1,8 +1,8 @@
 bind {{ansible_default_ipv4.address}}
 port 26379
 sentinel monitor gitlab-redis {{hostvars [groups ["redis-master"] [0]].ansible_default_ipv4.address}} 6379 2
-requirepass "gitlab"
-masterauth "gitlab"
+#requirepass "gitlab"
+#masterauth "gitlab"
 sentinel down-after-milliseconds gitlab-redis 10000
 sentinel failover-timeout gitlab-redis 30000
 sentinel auth-pass gitlab-redis gitlab
