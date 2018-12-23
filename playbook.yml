@@ -44,6 +44,33 @@
         disk_size: 10
         disk_type: pd-ssd
         type: redis
+    #create gitaly
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: n1-standard-1
+        instances:
+          - { index: 1, tag: gitaly }
+          #- { index: 2, tag: gitaly }
+        disk_size: 30
+        disk_type: pd-standard
+        type: gitaly
+    #create app
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: n1-standard-1
+        instances:
+          - { index: 1, tag: app}
+        disk_size: 30
+        disk_type: pd-standard
+        type: gitlab-app
+
+- hosts: localhost
+  tasks:
+    - name: Wait for instances to respond
+      wait_for:
+        host: "{{ item }}"
+        port: 22
+      loop: "{{ groups['all'] }}"
 
 - hosts: all
   become: yes
@@ -79,3 +106,55 @@
   become: yes
   roles:
     - { role: redis, type: slave }
+
+- hosts: localhost
+  tasks:
+    - name: Copy gitlab.yml
+      shell: |
+        cp gitlab.yml.example gitlab.yml
+    - name: Register gitaly default address
+      shell: |
+        sed -i.bak '613i\
+        \ \ \ \ \ \ default:
+        ' gitlab.yml
+        sed -i.bak '614i\
+        \ \ \ \ \ \ \ \ path: /home/git/repositories
+        ' gitlab.yml
+        sed -i.bak '615i\
+        \ \ \ \ \ \ \ \ gitaly_address: tcp://{{ hostvars[item].ansible_default_ipv4.address }}:8075
+        ' gitlab.yml
+      loop: "{{groups[\"gitaly\"]}}"
+      loop_control:
+        index_var: idx
+      when: idx == 0
+    - name: Register other gitaly adresses
+      shell: |
+        sed -i.bak '616i\
+        \ \ \ \ \ \ respository{{idx}}:
+        ' gitlab.yml
+        sed -i.bak '617i\
+        \ \ \ \ \ \ \ \ path: /home/git/repositories{{idx}}
+        ' gitlab.yml
+        sed -i.bak '618i\
+        \ \ \ \ \ \ \ \ gitaly_address: tcp://{{ hostvars[item].ansible_default_ipv4.address }}:8075
+        ' gitlab.yml
+      loop: "{{groups[\"gitaly\"]}}"
+      loop_control:
+        index_var: idx
+      when: idx != 0
+- hosts: app
+  become: yes
+  tasks:
+    - name: Copy gitlab.yml to gitlab-app instances
+      copy:
+        src: ./gitlab.yml
+        dest: ~/gitlab.yml
+- hosts: gitaly
+  become: yes
+  roles:
+    - { role: gitaly }
+
+- hosts: app
+  become: yes
+  roles:
+    - { role: app }

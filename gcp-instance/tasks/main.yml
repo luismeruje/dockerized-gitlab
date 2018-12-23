@@ -60,9 +60,3 @@
     name: "{{ item.networkInterfaces[0].accessConfigs[0].natIP }}"
     groups: "{{ item.tags['items'] | join(',') }}"
   loop: "{{ instance.results }}"
-
-- name: Wait for instances to respond
-  wait_for:
-    host: "{{ item }}"
-    port: 22
-  loop: "{{ groups['all'] }}"

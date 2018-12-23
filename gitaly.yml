@@ -36,6 +36,11 @@
 - hosts: all
   become: yes
   tasks:
+    - name: Wait for instances to respond
+      wait_for:
+        host: "{{ item }}"
+        port: 22
+      loop: "{{ groups['all'] }}"
     - name: Wait for updates to finish
       shell: while pgrep apt; do sleep 1; done;
 
