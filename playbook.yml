@@ -110,10 +110,11 @@
 
 - hosts: localhost
   tasks:
-    - name: Copy gitlab.yml
+    - name: Copy config files
       shell: |
         cp gitlab.yml.example gitlab.yml
-    - name: Register gitaly default address
+        cp resque.yml.example resque.yml
+    - name: write gitaly default address to config file
       shell: |
         sed -i.bak '613i\
         \ \ \ \ \ \ default:
@@ -128,7 +129,7 @@
       loop_control:
         index_var: idx
       when: idx == 0
-    - name: Register other gitaly adresses
+    - name: Write other gitaly adresses to config file
       shell: |
         sed -i.bak '616i\
         \ \ \ \ \ \ respository{{idx}}:
@@ -143,6 +144,18 @@
       loop_control:
         index_var: idx
       when: idx != 0
+    - name: Write redis adresses to config file
+      shell: |
+        echo "    -" >> resque.yml
+        echo "      host: {{ hostvars[item].ansible_default_ipv4.address }}" >> resque.yml
+        echo "      port: 26379" >> resque.yml
+      loop: "{{groups[\"redis-master\"]}}"
+    - name: Write redis adresses to config file
+      shell: |
+        echo "    -" >> resque.yml
+        echo "      host: {{ hostvars[item].ansible_default_ipv4.address }}" >> resque.yml
+        echo "      port: 26379" >> resque.yml
+      loop: "{{groups[\"redis-slave\"]}}"
 - hosts: app
   become: yes
   tasks:
@@ -150,6 +163,10 @@
       copy:
         src: ./gitlab.yml
         dest: ~/gitlab.yml
+    - name : Copy resque.yml to gitlab-app instances
+      copy:
+        src: ./resque.yml
+        dest: ~/resque.yml
 - hosts: gitaly
   become: yes
   roles:

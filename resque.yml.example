@@ -13,6 +13,5 @@ development:
 test:
   url: redis://localhost:6379
 production:
-  
   url: redis://gitlab-redis
   sentinels:

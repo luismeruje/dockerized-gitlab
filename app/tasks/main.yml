@@ -31,9 +31,10 @@
     ports:
       - "80:80"
 
-- name: Copy config file to container(cheating)
+- name: Copy config files to container(cheating)
   shell: |
     docker cp /root/gitlab.yml app:/home/git/gitlab/config/gitlab.yml
+    docker cp /root/resque.yml app:/home/git/gitlab/config/resque.yml
 
 - name: Start container
   docker_container:
