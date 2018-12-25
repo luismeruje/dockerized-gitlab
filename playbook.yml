@@ -96,17 +96,19 @@
       floating_ip: '10.10.10.10',
       zone: us-east1-b
       }
-    - { role: metricbeat, type: db }
+    - { role: beats, type: db }
 
 - hosts: redis-master
   become: yes
   roles:
     - { role: redis, type: master }
+    - { role: beats, type: redis }
 
 - hosts: redis-slave
   become: yes
   roles:
     - { role: redis, type: slave }
+    - { role: beats, type: redis }
 
 - hosts: localhost
   tasks:
@@ -171,8 +173,10 @@
   become: yes
   roles:
     - { role: gitaly }
+    - { role: beats, type: none }
 
 - hosts: app
   become: yes
   roles:
     - { role: app }
+    - { role: beats, type: app }

@@ -1,0 +1,41 @@
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/*.log
+    {% if type == 'db' %}
+    - /var/log/postgresql/*.log
+    {% endif %}
+
+    {% if type == 'redis' %}
+    - /var/log/redis/redis-server.log
+    {% endif %}
+
+{% if type == 'app' %}
+- type: docker
+  containers.ids: 
+    - '*'
+{% endif %}
+
+filebeat.modules:
+{% if type == 'db' %}
+- module: postgresql
+{% endif %}
+{% if type == 'redis' %}
+- module: redis
+{% endif %}
+- module: system
+
+setup.kibana:
+    host: "{{ hostvars[groups["monitor"][0]].ansible_default_ipv4.address }}"
+
+output.elasticsearch:
+    hosts: ["{{ hostvars[groups["monitor"][0]].ansible_default_ipv4.address }}"]
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~

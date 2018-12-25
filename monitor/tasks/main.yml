@@ -13,31 +13,35 @@
     name: openjdk-8-jre
     state: latest
 
-- name: Install Logstash, ElasticSearch and Kibana
+- name: Install ElasticSearch and Kibana
   apt:
-    name: ['logstash', 'elasticsearch', 'kibana']
+    name: ['elasticsearch', 'kibana']
     state: latest
 
-- name: Configure Logstash
-  copy:
-    src: logstash.yml
-    dest: /etc/logstash/logstash.yml
+#- name: Configure Logstash
+#  copy:
+#    src: logstash.yml
+#    dest: /etc/logstash/logstash.yml
 
 - name: Configure ElasticSearch
   copy:
     src: elasticsearch.yml
     dest: /etc/elasticsearch/elasticsearch.yml
 
+- name: Install ingest-geoip plugin
+  become: yes
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-plugin install ingest-geoip --batch"
+
 - name: Configure Kibana
   copy:
     src: kibana.yml
     dest: /etc/kibana/kibana.yml
 
-- name: Start Logstash
-  service:
-    name: logstash
-    enabled: yes
-    state: started
+#- name: Start Logstash
+#  service:
+#    name: logstash
+#    enabled: yes
+#    state: started
 
 - name: Start ElasticSearch
   service:
