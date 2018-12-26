@@ -55,6 +55,10 @@
     - postgresql_db:
         name: gitlabhq_production
         owner: gitlab
+    #gitab user database
+    - postgresql_db:
+        name: gitlab
+        owner: gitlab
     #copy dump
     - copy:
         src: gitlab_db.sql
