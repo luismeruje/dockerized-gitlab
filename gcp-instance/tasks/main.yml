@@ -22,8 +22,9 @@
     state: absent
   register: address
   loop: "{{ instances }}"
+  when: external_ip
 
-- name: create an instance
+- name: create an instance with external ip
   gcp_compute_instance:
     name: "gitlab-{{ type }}-{{ '%02d' | format(item.index) }}"
     machine_type: "{{ gcp_machine_type }}"
@@ -54,9 +55,49 @@
     state: present
   register: instance
   loop: "{{ instances }}"
+  when: external_ip
 
-- name: Add hosts to in memory inventory
+- name: Add hosts to in memory inventory (external IP)
   add_host:
     name: "{{ item.networkInterfaces[0].accessConfigs[0].natIP }}"
     groups: "{{ item.tags['items'] | join(',') }}"
   loop: "{{ instance.results }}"
+  when: external_ip
+
+- name: create an instance without external ip
+  gcp_compute_instance:
+    name: "gitlab-{{ type }}-{{ '%02d' | format(item.index) }}"
+    machine_type: "{{ gcp_machine_type }}"
+    disks:
+      - auto_delete: true
+        boot: true
+        source: "{{ disk.results[item.index - 1] }}"
+    metadata:
+      startup-script: |
+        #!/bin/bash
+        apt-get update -y
+        apt-get upgrade -y
+    tags:
+      items: "{{ item.tag }}"
+    network_interfaces:
+      - network: "{{ network }}"
+    zone: "{{ gcp_zone }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    service_accounts:
+      - scopes: ['https://www.googleapis.com/auth/compute']
+    can_ip_forward: true  
+    state: present
+  register: instance
+  loop: "{{ instances }}"
+  when: not(external_ip)
+  
+- name: Add hosts to in memory inventory (internal IP)
+  add_host:
+    name: "{{ item.networkInterfaces[0].networkIP }}"
+    groups: "{{ item.tags['items'] | join(',') }}"
+  loop: "{{ instance.results }}"
+  when: not(external_ip)
+
+

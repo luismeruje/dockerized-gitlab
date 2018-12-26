@@ -1,5 +1,4 @@
 - hosts: localhost
-  connection: local
   gather_facts: no
   vars:
     gcp_region: us-east1
@@ -21,6 +20,7 @@
         disk_size: 10
         disk_type: pd-standard
         type: monitor
+        external_ip: true
     
     #create database machines
     - role: gcp-instance
@@ -32,6 +32,7 @@
         disk_size: 10
         disk_type: pd-ssd
         type: db
+        external_ip: true
 
     #create redis machines
     - role: gcp-instance
@@ -44,6 +45,7 @@
         disk_size: 10
         disk_type: pd-ssd
         type: redis
+        external_ip: false
     #create gitaly
     - role: gcp-instance
       vars:
@@ -54,6 +56,7 @@
         disk_size: 30
         disk_type: pd-standard
         type: gitaly
+        external_ip: false
     #create app
     - role: gcp-instance
       vars:
@@ -63,6 +66,7 @@
         disk_size: 30
         disk_type: pd-standard
         type: gitlab-app
+        external_ip: true
 
 - hosts: localhost
   gather_facts: no
