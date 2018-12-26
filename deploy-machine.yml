@@ -16,14 +16,100 @@
     - role: gcp-instance
       vars:
         gcp_machine_type: n1-standard-1
-        external_ip: false
+        external_ip: true
         instances:
           - { index: 1, tag: deploy }
         disk_size: 10
         disk_type: pd-standard
         type: deploy
-  tasks: 
+  tasks:
+    - name: Wait for instances to respond
+      wait_for:
+        host: "{{ item }}"
+        port: 22
+      loop: "{{ groups['all'] }}"
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Wait for updates to finish
+      shell: while pgrep apt; do sleep 1; done;
+
+- hosts: localhost
+  vars:
+      gcp_region: us-east1
+      gcp_zone: us-east1-b
+      gcp_project: true-entropy-221110
+      gcp_cred_kind: serviceaccount
+      gcp_cred_file: ../credentials.json
+      source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
+  tasks:
+    - name: route for instances without external ip
+      gcp_compute_route:
+        auth_kind: "{{ gcp_cred_kind }}"
+        dest_range: 0.0.0.0/0
+        name: "cabodastormentas1"
+        network: "{{ network }}"
+        next_hop_ip: "{{hostvars[groups[\"deploy\"][0]].ansible_default_ipv4.address}}"
+        service_account_file: "{{ gcp_cred_file }}"
+        project: "{{ gcp_project }}"
+        priority: 800
+        tags:
+          - "no-ip"
+
+- hosts: deploy
+  become: yes
+  tasks:
+    - name: Modify net.ipv4.ip_forward config
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+    - name: Add iptables record
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: "ens4"
+        jump: MASQUERADE
+    - name: Persist net.ipv4.ip_forward config
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: net.ipv4.ip_forward=1
+        state: present
+    - name: Install iptables-persistent
+      apt:
+        name: iptables-persistent
+        state: present
+    - name: Add ansible ppa
+      apt_repository:
+        repo: ppa:ansible/ansible
+    - name: install ansible
+      apt:
+        name: [ansible]
+        state: latest
+    - name: Install pip
+      apt:
+        name: [python-pip]
+        state: latest
+  #Change to your user and key
+
+- hosts: deploy
+  become: yes
+  become_user: "luisferreira"
+  tasks:
     - name: copy key
       copy:
         src: ~/.ssh/deployment
-        dest: /Users/luisferreira/.ssh/deployment
+        dest: ~/.ssh/id_rsa
+        mode: 0400
+    - name: copy credentials
+      copy:
+        src: ../credentials.json
+        dest: ~/credentials.json
+    - name: clone git repository
+      git:
+        repo: https://github.com/luismeruje/dockerized-gitlab.git
+        dest: ~/dockerized-gitlab/
+    - name: install pip google cloud auth module
+      pip:
+        name: google-auth
+  

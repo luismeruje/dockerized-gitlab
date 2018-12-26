@@ -38,7 +38,9 @@
         apt-get update -y
         apt-get upgrade -y
     tags:
-      items: "{{ item.tag }}"
+      items: 
+        - "{{ item.tag }}"
+        - "nat"
     network_interfaces:
       - network: "{{ network }}"
         access_configs:
@@ -78,7 +80,9 @@
         apt-get update -y
         apt-get upgrade -y
     tags:
-      items: "{{ item.tag }}"
+      items: 
+       - "{{ item.tag }}"
+       - "no-ip"
     network_interfaces:
       - network: "{{ network }}"
     zone: "{{ gcp_zone }}"
