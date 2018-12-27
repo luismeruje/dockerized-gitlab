@@ -120,6 +120,7 @@
       shell: |
         cp gitlab.yml.example gitlab.yml
         cp resque.yml.example resque.yml
+        cp database.yml.example database.yml
     - name: write gitaly default address to config file
       shell: |
         sed -i.bak '613i\
@@ -162,6 +163,11 @@
         echo "      host: {{ hostvars[item].ansible_default_ipv4.address }}" >> resque.yml
         echo "      port: 26379" >> resque.yml
       loop: "{{groups[\"redis-slave\"]}}"
+    - name: Write postgresql address to config file
+      shell: |
+        sed -i.bak '11i\
+        \ \ host: 10.10.10.10
+        ' database.yml
 - hosts: app
   become: yes
   tasks:
