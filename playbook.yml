@@ -179,6 +179,10 @@
       copy:
         src: ./resque.yml
         dest: ~/resque.yml
+    - name: Copy database.yml to gitlab-app instances
+      copy:
+        src: ./database.yml
+        dest: ~/database.yml
 - hosts: gitaly
   become: yes
   roles:
