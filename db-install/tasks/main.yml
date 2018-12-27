@@ -30,6 +30,7 @@
     - service:
         name: networking
         state: restarted
+        enabled: yes
     - template:
         src: keepalived.conf.j2
         dest: /etc/keepalived/keepalived.conf
@@ -42,6 +43,7 @@
     - service:
         name: keepalived
         state: restarted
+        enabled: yes
 
 
 - name: Setup PostgreSQL
@@ -91,6 +93,7 @@
   service:
     name: postgresql
     state: restarted
+    enabled: yes
 
 - name: Bucardo install
   become: yes

@@ -37,12 +37,6 @@
     src: kibana.yml
     dest: /etc/kibana/kibana.yml
 
-#- name: Start Logstash
-#  service:
-#    name: logstash
-#    enabled: yes
-#    state: started
-
 - name: Start ElasticSearch
   service:
     name: elasticsearch

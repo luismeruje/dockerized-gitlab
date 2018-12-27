@@ -1,2 +1,1 @@
-#./deploy user
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbook.yml --user=$1
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook deploy-machine.yml -u sdb --private-key=keys/key -v

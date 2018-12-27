@@ -1,0 +1,59 @@
+- name: Copy config files
+  block:
+    - copy:
+        src: gitlab.yml.example
+        dest: gitlab.yml
+    - copy:
+        src: resque.yml.example 
+        dest: resque.yml
+    - copy:
+        src: database.yml.example
+        dest: database.yml
+
+- name: Write gitaly default address to config file
+  shell: |
+    sed -i.bak '613i\
+    \ \ \ \ \ \ default:
+    ' gitlab.yml
+    sed -i.bak '614i\
+    \ \ \ \ \ \ \ \ path: /home/git/repositories
+    ' gitlab.yml
+    sed -i.bak '615i\
+    \ \ \ \ \ \ \ \ gitaly_address: tcp://{{ hostvars[item].ansible_default_ipv4.address }}:8075
+    ' gitlab.yml
+  #'
+  loop: "{{groups[\"gitaly\"]}}"
+  loop_control:
+    index_var: idx
+  when: idx == 0
+
+- name: Write other gitaly adresses to config file
+  shell: |
+    sed -i.bak '616i\
+    \ \ \ \ \ \ respository{{idx}}:
+    ' gitlab.yml
+    sed -i.bak '617i\
+    \ \ \ \ \ \ \ \ path: /home/git/repositories{{idx}}
+    ' gitlab.yml
+    sed -i.bak '618i\
+    \ \ \ \ \ \ \ \ gitaly_address: tcp://{{ hostvars[item].ansible_default_ipv4.address }}:8075
+    ' gitlab.yml
+  #'
+  loop: "{{groups[\"gitaly\"]}}"
+  loop_control:
+    index_var: idx
+  when: idx != 0
+
+- name: Write redis adresses to config file
+  shell: |
+    echo "    -" >> resque.yml
+    echo "      host: {{ hostvars[item].ansible_default_ipv4.address }}" >> resque.yml
+    echo "      port: 26379" >> resque.yml
+  loop: "{{ groups['redis-master'] + groups['redis-slave'] }}"
+
+- name: Write postgresql address to config file
+  lineinfile:
+    path: database.yml
+    line: "  host: {{ database }}"
+    regexp: "__DATABASEHOST__"
+ 

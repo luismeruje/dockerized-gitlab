@@ -42,3 +42,4 @@
   service:
     name: metricbeat
     state: started
+    enabled: yes

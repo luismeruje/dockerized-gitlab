@@ -90,26 +90,30 @@
       apt:
         name: [python-pip]
         state: latest
-  #Change to your user and key
 
 - hosts: deploy
-  become: yes
-  become_user: "luisferreira"
+  become_user: "sdb"
   tasks:
-    - name: copy key
-      copy:
-        src: ~/.ssh/deployment
-        dest: ~/.ssh/id_rsa
-        mode: 0400
-    - name: copy credentials
+    - name: Copy credentials
       copy:
         src: ../credentials.json
         dest: ~/credentials.json
-    - name: clone git repository
+
+    - name: Clone git repository
       git:
         repo: https://github.com/luismeruje/dockerized-gitlab.git
         dest: ~/dockerized-gitlab/
-    - name: install pip google cloud auth module
+    
+    - name: Install pip google cloud auth module
       pip:
         name: google-auth
-  
+    
+    - name: Deploy
+      shell: |
+        cd /home/sdb/dockerized-gitlab
+        ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u sdb --private-key=keys/key playbook.yml -c paramiko
+
+    - name: Delete credentials
+      file:
+        path: ~/credentials.json
+        state: absent

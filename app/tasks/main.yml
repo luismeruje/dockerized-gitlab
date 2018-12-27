@@ -21,6 +21,12 @@
   docker_image:
     name: luismeruje/dockerized-gitlab:noGitaly
 
+- name: Create log directory in host
+  file:
+    path: /home/sdb/gitlab_logs
+    state: directory
+    mode: 777
+
 - name: Create container
   docker_container:
     name: app
@@ -30,11 +36,16 @@
     image: luismeruje/dockerized-gitlab:noGitaly
     ports:
       - "80:80"
+    volumes:
+      - "/home/sdb/gitlab_logs:/home/git/gitlab/log/"
+      
+    restart_policy: always
 
 - name: Copy config files to container(cheating)
   shell: |
-    docker cp /root/gitlab.yml app:/home/git/gitlab/config/gitlab.yml
-    docker cp /root/resque.yml app:/home/git/gitlab/config/resque.yml
+    docker cp /home/sdb/gitlab.yml app:/home/git/gitlab/config/gitlab.yml
+    docker cp /home/sdb/resque.yml app:/home/git/gitlab/config/resque.yml
+    docker cp /home/sdb/database.yml app:/home/git/gitlab/config/database.yml
 
 - name: Start container
   docker_container:
@@ -42,3 +53,4 @@
     tty: yes
     detach: yes
     state: started
+    restart_policy: always

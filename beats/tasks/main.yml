@@ -89,8 +89,10 @@
   service:
     name: metricbeat
     state: started
+    enabled: yes
 
 - name: Start Filebeat
   service:
     name: filebeat
     state: started
+    enabled: yes

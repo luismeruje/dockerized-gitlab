@@ -30,6 +30,7 @@
     - service:
         name: redis-server
         state: restarted
+        enabled: yes
 
 - name: Configuring Redis Sentinel
   block:

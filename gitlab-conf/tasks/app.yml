@@ -1,0 +1,14 @@
+- name: Copy gitlab.yml to gitlab-app instances
+  copy:
+    src: ./gitlab.yml
+    dest: /home/sdb/gitlab.yml
+
+- name: Copy database.yml to gitlab-app instances
+  copy:
+    src: ./database.yml
+    dest: /home/sdb/database.yml
+
+- name : Copy resque.yml to gitlab-app instances
+  copy:
+    src: ./resque.yml
+    dest: /home/sdb/resque.yml

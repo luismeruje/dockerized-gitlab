@@ -15,6 +15,10 @@ filebeat.inputs:
     - /var/log/redis/redis-server.log
     {% endif %}
 
+    {% if type == 'app' %}
+    - /home/sdb/gitlab_logs/
+    {% endif %}
+
 {% if type == 'app' %}
 - type: docker
   containers.ids: 

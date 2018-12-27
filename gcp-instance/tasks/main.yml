@@ -53,7 +53,7 @@
     service_account_file: "{{ gcp_cred_file }}"
     service_accounts:
       - scopes: ['https://www.googleapis.com/auth/compute']
-    can_ip_forward: true  
+    can_ip_forward: true
     state: present
   register: instance
   loop: "{{ instances }}"
@@ -91,7 +91,7 @@
     service_account_file: "{{ gcp_cred_file }}"
     service_accounts:
       - scopes: ['https://www.googleapis.com/auth/compute']
-    can_ip_forward: true  
+    can_ip_forward: true
     state: present
   register: instance
   loop: "{{ instances }}"

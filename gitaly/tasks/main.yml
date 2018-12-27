@@ -29,3 +29,4 @@
     image: luismeruje/dockerized-gitlab:gitaly
     ports:
       - "8075:8075"
+    restart_policy: always
