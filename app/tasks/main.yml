@@ -36,6 +36,7 @@
     image: luismeruje/dockerized-gitlab:noGitaly
     ports:
       - "80:80"
+      - "22:22"
     volumes:
       - "/home/sdb/gitlab_logs:/home/git/gitlab/log/"
       

@@ -85,6 +85,23 @@
   tasks:
     - name: Wait for updates to finish
       shell: while pgrep apt; do sleep 1; done;
+    - name: Change ssh port on VM's
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^Port"
+        line: "Port 2222"
+    - name: Restart ssh service
+      service:
+        name: sshd
+        state: restarted
+      ignore_errors: "yes"
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Set new ssh port
+      set_fact:
+        ansible_port: 2222
 
 - hosts: monitor
   become: yes
