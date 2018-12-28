@@ -40,8 +40,8 @@
 
 - name: Copy config files to container(cheating)
   shell: |
-    docker cp /home/sdb/.gitlab_shell_secret app:/home/git/gitlab-shell/.gitlab_shell_secret
-    
+    docker cp /home/sdb/.gitlab_shell_secret gitaly:/home/git/gitlab-shell/.gitlab_shell_secret
+
 - name: Start container
   docker_container:
     name: gitaly
