@@ -80,6 +80,7 @@
         port: 22
       loop: "{{ groups['all'] }}"
 
+
 - hosts: all
   become: yes
   tasks:
@@ -96,7 +97,7 @@
         state: restarted
       ignore_errors: "yes"
 
-- hosts: localhost
+- hosts: all
   gather_facts: no
   tasks:
     - name: Set new ssh port

@@ -17,6 +17,7 @@
           - 80
           - 5601
           - 443
+          - 2222
       - ip_protocol: icmp
     network: "global/networks/{{ network.name }}"
     project: "{{ gcp_project }}"
