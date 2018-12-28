@@ -12,3 +12,8 @@
   copy:
     src: ./resque.yml
     dest: /home/sdb/resque.yml
+
+- name: Copy gitlab-shell secret to gitlab-app instances
+  copy:
+    src: ./.gitlab_shell_secret
+    dest: /home/sdb/.gitlab_shell_secret

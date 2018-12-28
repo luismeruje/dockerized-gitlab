@@ -21,11 +21,11 @@
   docker_image:
     name: luismeruje/dockerized-gitlab:noGitaly
 
-- name: Create log directory in host
-  file:
-    path: /home/sdb/gitlab_logs
-    state: directory
-    mode: 777
+#- name: Create log directory in host
+#  file:
+#    path: /home/sdb/gitlab_logs
+#    state: directory
+#    mode: 777
 
 - name: Create container
   docker_container:
@@ -37,8 +37,8 @@
     ports:
       - "80:80"
       - "22:22"
-    volumes:
-      - "/home/sdb/gitlab_logs:/home/git/gitlab/log/"
+    #volumes:
+    #  - "/home/sdb/gitlab_logs:/home/git/gitlab/log/"
       
     restart_policy: always
 
@@ -47,6 +47,7 @@
     docker cp /home/sdb/gitlab.yml app:/home/git/gitlab/config/gitlab.yml
     docker cp /home/sdb/resque.yml app:/home/git/gitlab/config/resque.yml
     docker cp /home/sdb/database.yml app:/home/git/gitlab/config/database.yml
+    docker cp /home/sdb/.gitlab_shell_secret app:/home/git/gitlab-shell/.gitlab_shell_secret
 
 - name: Start container
   docker_container:
