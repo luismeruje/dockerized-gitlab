@@ -1,8 +1,8 @@
 - name: Copy config files
   block:
     - copy:
-      src: config.yml.example
-      dest: config.yml
+        src: config.yml.example
+        dest: config.yml
 
 #TODO: subsitute for load balancer address
 - name: Write load balancer address to gitlab-shell config
