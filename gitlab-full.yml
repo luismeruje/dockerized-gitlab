@@ -5,10 +5,10 @@
 
   vars:
     service_account_email: 567105855498-compute@developer.gserviceaccount.com
-    gcp_cred_file: /insert/credentials/path/here
+    gcp_cred_file: ~/dev/a4/SDB/gitlab/credentials.json
     gcp_project: true-entropy-221110
     gcp_cred_kind: serviceaccount
-    machine_type: n1-standard-1
+    machine_type: n1-highcpu-8
     image: debian-7
     zone: us-west1-c
 
@@ -17,7 +17,8 @@
     - name: create a disk
       gcp_compute_disk:
           name: "disk-instance"
-          size_gb: 30
+          size_gb: 100
+          type: pd-ssd
           source_image: projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts
           zone: "{{ zone }}"
           project: "{{ gcp_project }}"
