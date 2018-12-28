@@ -21,7 +21,7 @@
         disk_type: pd-standard
         type: monitor
         external_ip: true
-    
+
     #create database machines
     - role: gcp-instance
       vars:
@@ -69,6 +69,16 @@
         disk_type: pd-standard
         type: gitlab-app
         external_ip: true
+    #create test machine
+    - role: gcp-instance
+      vars:
+        gcp_machine_type: n1-highcpu-4
+        instances:
+          - { index: 1, tag: tests }
+        disk_size: 10
+        disk_type: pd-standard
+        type: tests
+        external_ip: true
 
 
 - hosts: localhost
@@ -115,17 +125,17 @@
 
 - hosts: monitor
   become: yes
-  roles: 
+  roles:
     - { role: monitor }
 
 - hosts: db-*
   become: yes
   roles:
-    - { 
+    - {
       role: db-install,
       pg_version: '9.5',
       bucardo_version: '5.5.0',
-      listen: '*', 
+      listen: '*',
       pg_password: 'password',
       floating_ip: '10.10.10.10',
       zone: us-east1-b
@@ -164,3 +174,8 @@
   roles:
     - { role: app }
     - { role: beats, type: app }
+
+- hosts: tests
+  become: yes
+  roles:
+    - { role: tests }

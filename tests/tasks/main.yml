@@ -1,0 +1,14 @@
+- name: Install python
+  apt:
+    name: [python]
+    state: latest
+
+- name: Install java
+  apt:
+    name: [default-jdk]
+    state: latest
+
+- name: Install matplotlib
+  apt:
+    name: [python-matplotlib]
+    state: latest
