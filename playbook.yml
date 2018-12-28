@@ -14,10 +14,10 @@
     #create monitor
     - role: gcp-instance
       vars:
-        gcp_machine_type: n1-standard-1
+        gcp_machine_type: n1-highcpu-4
         instances:
           - { index: 1, tag: monitor }
-        disk_size: 10
+        disk_size: 50
         disk_type: pd-standard
         type: monitor
         external_ip: true
@@ -25,11 +25,11 @@
     #create database machines
     - role: gcp-instance
       vars:
-        gcp_machine_type: f1-micro
+        gcp_machine_type: n1-highcpu-8
         instances:
           - { index: 1, tag: db-primary }
           - { index: 2, tag: db-standby }
-        disk_size: 10
+        disk_size: 100
         disk_type: pd-ssd
         type: db
         external_ip: true
@@ -37,48 +37,53 @@
     #create redis machines
     - role: gcp-instance
       vars:
-        gcp_machine_type: f1-micro
+        gcp_machine_type: n1-standard-2
         instances:
           - { index: 1, tag: redis-master }
           - { index: 2, tag: redis-slave }
           - { index: 3, tag: redis-slave }
-        disk_size: 10
-        disk_type: pd-ssd
+        disk_size: 30
+        disk_type: pd-standard
         type: redis
         external_ip: false
 
     #create gitaly
     - role: gcp-instance
       vars:
-        gcp_machine_type: n1-standard-1
+        gcp_machine_type: n1-standard-2
         instances:
           - { index: 1, tag: gitaly }
-          #- { index: 2, tag: gitaly }
-        disk_size: 30
-        disk_type: pd-standard
+          - { index: 2, tag: gitaly }
+        disk_size: 50
+        disk_type: pd-ssd
         type: gitaly
         external_ip: false
 
     #create app
     - role: gcp-instance
       vars:
-        gcp_machine_type: n1-standard-1
+        gcp_machine_type: n1-highcpu-4
         instances:
           - { index: 1, tag: app}
+          - { index: 2, tag: app}
+          - { index: 3, tag: app}
         disk_size: 30
         disk_type: pd-standard
         type: gitlab-app
         external_ip: true
+
     #create test machine
     - role: gcp-instance
       vars:
-        gcp_machine_type: n1-highcpu-4
+        gcp_machine_type: n1-highcpu-8
         instances:
           - { index: 1, tag: tests }
         disk_size: 10
         disk_type: pd-standard
         type: tests
         external_ip: true
+      
+      
 
 
 - hosts: localhost
