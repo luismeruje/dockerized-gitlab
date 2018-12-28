@@ -1,0 +1,57 @@
+#Maybe not needed
+- name: Copy gitlab-shell secret to gitaly instances
+  copy:
+    src: ./.gitlab_shell_secret
+    dest: /home/sdb/.gitlab_shell_secret
+
+- name: Copy config.yml to gitaly instances
+  copy:
+    src: ./config.yml
+    dest: /home/sdb/config.yml
+
+- name: Install Docker
+  apt:
+    name: [docker.io]
+    state: latest
+
+- name: Install pip
+  apt:
+    name: [python-pip]
+    state: latest
+
+- name: Upgrade pip
+  shell: |
+    pip install --upgrade pip
+
+- name: Install docker pip module
+  shell: |
+    pip install docker
+
+- name: Pull docker image
+  docker_image:
+    name: luismeruje/dockerized-gitlab:gitaly
+
+- name: Create container
+  docker_container:
+    name: gitaly
+    tty: yes
+    detach: yes
+    state: present
+    image: luismeruje/dockerized-gitlab:gitaly
+    ports:
+      - "8075:8075"
+      - "22:22"
+    restart_policy: always
+
+- name: Copy config files to container(cheating)
+  shell: |
+    docker cp /home/sdb/.gitlab_shell_secret gitaly:/home/git/gitlab-shell/.gitlab_shell_secret
+    docker cp /home/sdb/config.yml gitaly:/home/git/gitlab-shell/config.yml
+
+- name: Start container
+  docker_container:
+    name: gitaly
+    tty: yes
+    detach: yes
+    state: started
+    restart_policy: always

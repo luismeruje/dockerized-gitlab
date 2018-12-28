@@ -1,0 +1,12 @@
+- name: Copy config files
+  block:
+    - copy:
+        src: config.yml.example
+        dest: config.yml
+
+#TODO: subsitute for load balancer address
+- name: Write load balancer address to gitlab-shell config
+  lineinfile:
+    dest: config.yml
+    regexp: "^gitlab_url:"
+    line: "gitlab_url: \"http://{{ hostvars[groups[\"app\"][0]].ansible_default_ipv4.address }}:8080\""

@@ -1,32 +1,5 @@
-#Maybe not needed
-- name: Install Docker
-  apt:
-    name: [docker.io]
-    state: latest
+- include: local.yml
+  when: local
 
-- name: Install pip
-  apt:
-    name: [python-pip]
-    state: latest
-
-- name: Upgrade pip
-  shell: |
-    pip install --upgrade pip
-
-- name: Install docker pip module
-  shell: |
-    pip install docker
-
-- name: Pull docker image
-  docker_image:
-    name: luismeruje/dockerized-gitlab:gitaly
-
-- name: Run image
-  docker_container:
-    name: gitaly
-    tty: yes
-    detach: yes
-    image: luismeruje/dockerized-gitlab:gitaly
-    ports:
-      - "8075:8075"
-    restart_policy: always
+- include: gitaly.yml
+  when: not local

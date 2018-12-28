@@ -147,6 +147,7 @@
 - hosts: localhost
   roles:
     - { role: gitlab-conf, local: true, database: '10.10.10.10' }
+    - { role: gitaly, local: true}
 
 - hosts: app
   roles:
@@ -155,7 +156,7 @@
 - hosts: gitaly
   become: yes
   roles:
-    - { role: gitaly }
+    - { role: gitaly, local: false }
     - { role: beats, type: none }
 
 - hosts: app
