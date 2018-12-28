@@ -104,6 +104,15 @@
       set_fact:
         ansible_port: 2222
 
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Wait for instances to respond
+      wait_for:
+        host: "{{ item }}"
+        port: 2222
+      loop: "{{ groups['all'] }}"
+
 - hosts: monitor
   become: yes
   roles: 

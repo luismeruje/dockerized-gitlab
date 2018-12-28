@@ -51,16 +51,16 @@
   block:
     #gitlab user
     - postgresql_user:
-        name: gitlab
+        name: git
         password: "{{ pg_password }}"
     #gitab database
     - postgresql_db:
         name: gitlabhq_production
-        owner: gitlab
+        owner: git
     #gitab user database
     - postgresql_db:
         name: gitlab
-        owner: gitlab
+        owner: git
     #copy dump
     - copy:
         src: gitlab_db.sql
