@@ -9,4 +9,4 @@
   lineinfile:
     dest: config.yml
     regexp: "^gitlab_url:"
-    line: "^gitlab_url: \"http://{{ hostvars[groups[\"app\"][0]].ansible_default_ipv4.address }}:8080\""
+    line: "gitlab_url: \"http://{{ hostvars[groups[\"app\"][0]].ansible_default_ipv4.address }}:8080\""
