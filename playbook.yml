@@ -32,7 +32,7 @@
         disk_size: 100
         disk_type: pd-ssd
         type: db
-        external_ip: true
+        external_ip: false
 
     #create redis machines
     - role: gcp-instance
