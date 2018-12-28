@@ -1,14 +1,46 @@
 - name: Install python
   apt:
-    name: [python]
+    name: [python3]
     state: latest
 
 - name: Install java
   apt:
-    name: [default-jdk]
+    name: [openjdk-8-jdk]
     state: latest
 
 - name: Install matplotlib
   apt:
-    name: [python-matplotlib]
+    name: [python3-matplotlib]
     state: latest
+
+- name: Install unzip
+  apt:
+    name: [unzip]
+    state: latest
+
+- name: Download Apache JMeter
+  get_url:
+    url: http://mirrors.up.pt/pub/apache//jmeter/binaries/apache-jmeter-5.0.zip
+    dest: /home/sdb/apache-jmeter-5.0.zip
+
+- name: Extract Apache JMeter
+  unarchive:
+    src: /home/sdb/apache-jmeter-5.0.zip
+    dest: /home/sdb/
+    remote_src: yes
+
+- name: Copy benchmark files
+  copy:
+    src: bench_files.zip
+    dest: /home/sdb/
+
+- name: Extract benchmark files
+  unarchive:
+    src: /home/sdb/bench_files.zip
+    dest: /home/sdb/
+    remote_src: yes
+
+- name: Run http.server
+  shell: |
+    cd /home/sdb/results
+    nohup python3 -m http.server 8080 &
