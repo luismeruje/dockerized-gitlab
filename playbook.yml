@@ -38,7 +38,7 @@
     #create redis machines
     - role: gcp-instance
       vars:
-        gcp_machine_type: n1-standard-2
+        gcp_machine_type: n1-standard-1
         instances:
           - { index: 1, tag: redis-master }
           - { index: 2, tag: redis-slave }
@@ -130,17 +130,19 @@
         port: 2222
       loop: "{{ groups['all'] }}"
 
-- hosts: localhost
-  gather_facts: no
-  vars:
-    test: true
-    gcp_region: us-east1
-    gcp_zone: us-east1-b
-    gcp_project: true-entropy-221110
-    gcp_cred_kind: serviceaccount
-    gcp_cred_file: ../credentials.json
-    source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
-
+# - hosts: localhost
+#   gather_facts: no
+#   vars:
+#     test: true
+#     gcp_region: us-east1
+#     gcp_zone: us-east1-b
+#     gcp_project: true-entropy-221110
+#     gcp_cred_kind: serviceaccount
+#     gcp_cred_file: ../credentials.json
+#     source_image: projects/ubuntu-os-cloud/global/images/ubuntu-1604-xenial-v20181030
+#   roles:
+#   #create load balancer
+#     - role: gcp-load-balancer
 
 - hosts: monitor
   become: yes
