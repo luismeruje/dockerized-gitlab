@@ -37,6 +37,7 @@
     ports:
       - "80:80"
       - "22:22"
+      - "8080:8080"
     #volumes:
     #  - "/home/sdb/gitlab_logs:/home/git/gitlab/log/"
       
@@ -48,6 +49,7 @@
     docker cp /home/sdb/resque.yml app:/home/git/gitlab/config/resque.yml
     docker cp /home/sdb/database.yml app:/home/git/gitlab/config/database.yml
     docker cp /home/sdb/.gitlab_shell_secret app:/home/git/gitlab-shell/.gitlab_shell_secret
+    docker cp /home/sdb/unicorn.rb app:/home/git/gitlab/config/unicorn.rb
 
 - name: Start container
   docker_container:

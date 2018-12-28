@@ -17,3 +17,8 @@
   copy:
     src: ./.gitlab_shell_secret
     dest: /home/sdb/.gitlab_shell_secret
+
+- name: Copy unicorn.rb to gitlab-app instances
+  copy:
+    src: ./unicorn.rb
+    dest: /home/sdb/unicorn.rb
