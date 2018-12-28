@@ -199,4 +199,5 @@
 - hosts: tests
   become: yes
   roles:
-    - { role: tests }
+    -  role: tests 
+       when: test
