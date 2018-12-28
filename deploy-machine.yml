@@ -99,6 +99,11 @@
         src: ../credentials.json
         dest: ~/credentials.json
 
+    - name: Copy load balancer script
+      copy:
+        src: ./create-balancer.sh
+        dest: ~/create-balancer.sh
+
     - name: Clone git repository
       git:
         repo: https://github.com/luismeruje/dockerized-gitlab.git
@@ -112,6 +117,9 @@
       shell: |
         cd /home/sdb/dockerized-gitlab
         ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u sdb --private-key=keys/key playbook.yml -c paramiko
+    - name: Create load balancer
+      shell: |
+        sh /home/git/sdb/create-balancer.sh
 
     - name: Delete credentials
       file:
