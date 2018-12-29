@@ -119,7 +119,7 @@
         ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u sdb --private-key=keys/key playbook.yml -c paramiko
     - name: Create load balancer
       shell: |
-        sh /home/git/sdb/create-balancer.sh
+        sh /home/sdb/create-balancer.sh
 
     - name: Delete credentials
       file:
