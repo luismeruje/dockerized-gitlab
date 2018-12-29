@@ -26,6 +26,8 @@
     #create database machines
     - role: gcp-instance
       vars:
+        gcp_region: us-west1
+        gcp_zone: us-west1-b
         gcp_machine_type: n1-highcpu-2
         instances:
           - { index: 1, tag: db-primary }
