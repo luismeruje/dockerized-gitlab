@@ -1,7 +1,6 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    test: true
     gcp_region: us-east1
     gcp_zone: us-east1-b
     gcp_project: true-entropy-221110
@@ -198,6 +197,8 @@
 
 - hosts: tests
   become: yes
+  vars:
+    test: true
   roles:
     -  role: tests 
        when: test
